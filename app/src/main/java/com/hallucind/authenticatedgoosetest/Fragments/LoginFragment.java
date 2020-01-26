@@ -1,11 +1,13 @@
-package com.hallucind.authenticatedgoosetest;
+package com.hallucind.authenticatedgoosetest.Fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
+
+import com.hallucind.authenticatedgoosetest.AuthActivity;
+import com.hallucind.authenticatedgoosetest.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
