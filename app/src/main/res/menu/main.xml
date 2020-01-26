@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/change_profile_picture"
+        android:title="Change Profile Picture" />
+
+    <item
+        android:id="@+id/change_display_name"
+        android:title="Change Display Name" />
+
+    <item
+        android:id="@+id/change_email"
+        android:title="Change Email" />
+
+    <item
+        android:id="@+id/change_password"
+        android:title="Change Password" />
+
+    <item
+        android:id="@+id/delete_account"
+        android:title="Delete Account" />
+
+    <item
+        android:id="@+id/sign_out"
+        android:title="Sign out" />
+</menu>
