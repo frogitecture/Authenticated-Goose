@@ -1,4 +1,4 @@
-package com.hallucind.authenticatedgoosetest;
+package com.hallucind.authenticatedgoosetest.Fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +16,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.hallucind.authenticatedgoosetest.AuthActivity;
+import com.hallucind.authenticatedgoosetest.R;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -80,7 +82,7 @@ public class RegisterFragment extends Fragment {
 
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        Toast.makeText(getActivity(), "Register success", Toast.LENGTH_LONG).show();
+                                                        ((AuthActivity)getActivity()).changeActivity(new WelcomeFragment());
                                                     }
                                                 });
                                     }
