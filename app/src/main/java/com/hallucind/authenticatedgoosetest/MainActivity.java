@@ -13,15 +13,25 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeDisplayNameDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeEmailDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.ChangePasswordDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.DeleteAccountDialog;
 
-public class MainActivity extends AppCompatActivity implements FirebaseListener{
+public class MainActivity extends AppCompatActivity implements FirebaseListener,
+        ChangeDisplayNameDialog.ChangeDisplayNameListener, ChangeEmailDialog.ChangeEmailListener,
+        ChangePasswordDialog.ChangePasswordListener, DeleteAccountDialog.DeleteAccountListener {
 
     private final int PICK_IMAGE = 100;
 
@@ -50,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener{
 
         imageView = findViewById(R.id.image);
         useridTxt = findViewById(R.id.uid_txt);
-        displayNameTxt = findViewById(R.id.display_name_txt);
+        displayNameTxt = findViewById(R.id.edittext);
         emailTxt = findViewById(R.id.email_txt);
         verifiedTxt = findViewById(R.id.verified_txt);
         sendVerificationTxt = findViewById(R.id.send_verification_txt);
@@ -87,15 +97,23 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener{
                 break;
 
             case R.id.change_display_name:
-
+                ChangeDisplayNameDialog changeDisplayNameDialog = new ChangeDisplayNameDialog();
+                changeDisplayNameDialog.show(getSupportFragmentManager(),"Change Display Name");
                 break;
 
             case R.id.change_email:
-
+                ChangeEmailDialog changeEmailDialog = new ChangeEmailDialog();
+                changeEmailDialog.show(getSupportFragmentManager(),"Change Email");
                 break;
 
             case R.id.change_password:
+                ChangePasswordDialog changePasswordDialog = new ChangePasswordDialog();
+                changePasswordDialog.show(getSupportFragmentManager(),"Change Password");
+                break;
 
+            case R.id.delete_account:
+                DeleteAccountDialog deleteAccountDialog = new DeleteAccountDialog();
+                deleteAccountDialog.show(getSupportFragmentManager(),"Delete account");
                 break;
 
             case R.id.sign_out:
@@ -141,5 +159,92 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener{
     @Override
     public void onChangedProfilePicture(Uri uri) {
         Glide.with(this).load(uri).into(imageView);
+    }
+
+    @Override
+    public void onChangeDisplayName(final String displayName) {
+        UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
+                .setDisplayName(displayName)
+                .build();
+
+        firebaseUser.updateProfile(profileChangeRequest)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            displayNameTxt.setText(displayName);
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onChangeEmail(final String newEmail, String password) {
+        String currentEmail = firebaseUser.getEmail();
+        AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, password);
+
+        firebaseUser.reauthenticate(credential)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        firebaseUser.updateEmail(newEmail)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            emailTxt.setText(newEmail);
+                                        }
+                                    }
+                                });
+                    }
+                });
+    }
+
+    @Override
+    public void onChangePassword(String oldPassword, final String newPassword) {
+        String currentEmail = firebaseUser.getEmail();
+        AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, oldPassword);
+
+        firebaseUser.reauthenticate(credential)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        firebaseUser.updatePassword(newPassword)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(MainActivity.this, "Password was changed successfully", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+                    }
+                });
+    }
+
+    @Override
+    public void onDeleteAccount(String password) {
+        String currentEmail = firebaseUser.getEmail();
+        AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, password);
+
+        firebaseUser.reauthenticate(credential)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        firebaseUser.delete()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            finish();
+                                            startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                                        }
+                                    }
+                                });
+                    }
+                });
     }
 }
