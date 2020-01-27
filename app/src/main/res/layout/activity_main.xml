@@ -79,7 +79,7 @@
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/display_name_txt"
+                    android:id="@+id/edittext"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="John Doe"
