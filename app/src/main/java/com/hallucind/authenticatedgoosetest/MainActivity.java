@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
         if (firebaseAuth.getCurrentUser() == null) {
             finish();
             startActivity(new Intent(this, AuthActivity.class));
+            return;
         } else {
             firebaseUser = firebaseAuth.getCurrentUser();
         }
