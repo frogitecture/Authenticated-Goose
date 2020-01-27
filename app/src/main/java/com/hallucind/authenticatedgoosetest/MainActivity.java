@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,8 +70,30 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
         Uri profilePicture = firebaseUser.getPhotoUrl();
         String uid = firebaseUser.getUid();
         String displayName = firebaseUser.getDisplayName();
-        String email = firebaseUser.getEmail();
-        String verifiedEmail = firebaseUser.isEmailVerified() ? "Yes" : "No";
+        final String email = firebaseUser.getEmail();
+        String verifiedEmail = "No";
+
+        if (firebaseUser.isEmailVerified()) {
+            verifiedEmail = "Yes";
+            sendVerificationTxt.setVisibility(View.GONE);
+        } else {
+            sendVerificationTxt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
+
+                    auth.sendPasswordResetEmail(email)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(MainActivity.this, "Email sent! Check your inbox", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                }
+            });
+        }
 
         Glide.with(this).load(profilePicture).into(imageView);
         useridTxt.setText(uid);
