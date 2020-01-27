@@ -16,6 +16,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hallucind.authenticatedgoosetest.AuthActivity;
+import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeDisplayNameDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.ResetPasswordDialog;
 import com.hallucind.authenticatedgoosetest.MainActivity;
 import com.hallucind.authenticatedgoosetest.R;
 
@@ -30,6 +32,7 @@ public class LoginFragment extends Fragment {
     private TextView emailTxt;
     private TextView passwordTxt;
     private TextView registerTxt;
+    private TextView forgotPasswordTxt;
     private Button signInBtn;
 
     @Nullable
@@ -41,6 +44,7 @@ public class LoginFragment extends Fragment {
 
         emailTxt = parentView.findViewById(R.id.email_txt);
         passwordTxt = parentView.findViewById(R.id.password_txt);
+        forgotPasswordTxt = parentView.findViewById(R.id.forgot_password_txt);
         registerTxt = parentView.findViewById(R.id.not_registered_txt);
         signInBtn = parentView.findViewById(R.id.login_btn);
 
@@ -57,6 +61,14 @@ public class LoginFragment extends Fragment {
                 String email = emailTxt.getText().toString();
                 String password = passwordTxt.getText().toString();
                 signIn(email, password);
+            }
+        });
+
+        forgotPasswordTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ResetPasswordDialog resetPasswordDialog = new ResetPasswordDialog();
+                resetPasswordDialog.show(getActivity().getSupportFragmentManager(),"Change Display Name");
             }
         });
 
