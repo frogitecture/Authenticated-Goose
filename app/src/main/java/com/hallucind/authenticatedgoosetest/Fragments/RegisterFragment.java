@@ -76,6 +76,16 @@ public class RegisterFragment extends Fragment {
                                             .setDisplayName(displayName)
                                             .build();
 
+                                    user.sendEmailVerification()
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Toast.makeText(getActivity(), "Verification email was sent", Toast.LENGTH_LONG).show();
+                                                    }
+                                                }
+                                            });
+
                                     if (user != null) {
                                         user.updateProfile(profileChangeRequest)
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
