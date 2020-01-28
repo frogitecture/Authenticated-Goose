@@ -29,6 +29,7 @@ import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeDisplayNameDia
 import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeEmailDialog;
 import com.hallucind.authenticatedgoosetest.DialogFragments.ChangePasswordDialog;
 import com.hallucind.authenticatedgoosetest.DialogFragments.DeleteAccountDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.LoadingDialog;
 
 public class MainActivity extends AppCompatActivity implements FirebaseListener,
         ChangeDisplayNameDialog.ChangeDisplayNameListener, ChangeEmailDialog.ChangeEmailListener,
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
     private final int PICK_IMAGE = 100;
 
     private FirebaseUser firebaseUser;
+    LoadingDialog loadingDialog;
 
     private ImageView imageView;
     private TextView displayNameTxt;
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
         } else {
             firebaseUser = firebaseAuth.getCurrentUser();
         }
+
+        loadingDialog = new LoadingDialog();
 
         imageView = findViewById(R.id.image);
         useridTxt = findViewById(R.id.uid_txt);
@@ -165,6 +169,9 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
     }
 
     private void updateUserProfilePicture(final Uri uri) {
+        loadingDialog.setMessage("Changing profile picture...");
+        loadingDialog.show(getSupportFragmentManager(),"Changing Profile Picture");
+
         UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
                 .setPhotoUri(uri)
                 .build();
@@ -176,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
                         if (task.isSuccessful()) {
                             onChangedProfilePicture(uri);
                         }
+                        loadingDialog.dismiss();
                     }
                 });
     }
@@ -187,6 +195,9 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
 
     @Override
     public void onChangeDisplayName(final String displayName) {
+        loadingDialog.setMessage("Changing display name...");
+        loadingDialog.show(getSupportFragmentManager(),"Changing Display Name...");
+
         UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
                 .setDisplayName(displayName)
                 .build();
@@ -198,12 +209,16 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
                         if (task.isSuccessful()) {
                             displayNameTxt.setText(displayName);
                         }
+                        loadingDialog.dismiss();
                     }
                 });
     }
 
     @Override
     public void onChangeEmail(final String newEmail, String password) {
+        loadingDialog.setMessage("Changing email...");
+        loadingDialog.show(getSupportFragmentManager(),"Changing Email");
+
         String currentEmail = firebaseUser.getEmail();
         AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, password);
 
@@ -212,6 +227,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
 
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+
+                        if (task.isSuccessful()) {
                         firebaseUser.updateEmail(newEmail)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
@@ -219,14 +236,22 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
                                         if (task.isSuccessful()) {
                                             emailTxt.setText(newEmail);
                                         }
+                                        loadingDialog.dismiss();
                                     }
                                 });
+                        } else {
+                            Toast.makeText(MainActivity.this, "Authentication failed, wrong password?", Toast.LENGTH_LONG).show();
+                            loadingDialog.dismiss();
+                        }
                     }
                 });
     }
 
     @Override
     public void onChangePassword(String oldPassword, final String newPassword) {
+        loadingDialog.setMessage("Changing password...");
+        loadingDialog.show(getSupportFragmentManager(),"Changing Password");
+
         String currentEmail = firebaseUser.getEmail();
         AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, oldPassword);
 
@@ -235,21 +260,30 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
 
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        firebaseUser.updatePassword(newPassword)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(MainActivity.this, "Password was changed successfully", Toast.LENGTH_LONG).show();
+                        if (task.isSuccessful()) {
+                            firebaseUser.updatePassword(newPassword)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(MainActivity.this, "Password was changed successfully", Toast.LENGTH_LONG).show();
+                                            }
+                                            loadingDialog.dismiss();
                                         }
-                                    }
-                                });
+                                    });
+                        } else {
+                            Toast.makeText(MainActivity.this, "Authentication failed, wrong password?", Toast.LENGTH_LONG).show();
+                            loadingDialog.dismiss();
+                        }
                     }
                 });
     }
 
     @Override
     public void onDeleteAccount(String password) {
+        loadingDialog.setMessage("Deleting account...");
+        loadingDialog.show(getSupportFragmentManager(),"Deleting Account");
+
         String currentEmail = firebaseUser.getEmail();
         AuthCredential credential = EmailAuthProvider.getCredential(currentEmail, password);
 
@@ -258,16 +292,22 @@ public class MainActivity extends AppCompatActivity implements FirebaseListener,
 
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        firebaseUser.delete()
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            finish();
-                                            startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                        if (task.isSuccessful()) {
+                            firebaseUser.delete()
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                finish();
+                                                startActivity(new Intent(MainActivity.this, AuthActivity.class));
+                                            }
+                                            loadingDialog.dismiss();
                                         }
-                                    }
-                                });
+                                    });
+                        } else {
+                            Toast.makeText(MainActivity.this, "Authentication failed, wrong password?", Toast.LENGTH_LONG).show();
+                            loadingDialog.dismiss();
+                        }
                     }
                 });
     }

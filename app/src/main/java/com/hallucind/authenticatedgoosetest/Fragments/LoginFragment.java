@@ -2,7 +2,6 @@ package com.hallucind.authenticatedgoosetest.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +11,11 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.hallucind.authenticatedgoosetest.AuthActivity;
-import com.hallucind.authenticatedgoosetest.DialogFragments.ChangeDisplayNameDialog;
+import com.hallucind.authenticatedgoosetest.DialogFragments.LoadingDialog;
 import com.hallucind.authenticatedgoosetest.DialogFragments.ResetPasswordDialog;
 import com.hallucind.authenticatedgoosetest.MainActivity;
 import com.hallucind.authenticatedgoosetest.R;
@@ -27,6 +26,7 @@ import androidx.fragment.app.Fragment;
 
 public class LoginFragment extends Fragment {
 
+    private LoadingDialog loadingDialog;
     private FirebaseAuth firebaseAuth;
 
     private TextView emailTxt;
@@ -40,6 +40,7 @@ public class LoginFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View parentView = inflater.inflate(R.layout.fragment_login, container, false);
 
+        loadingDialog = new LoadingDialog();
         firebaseAuth = FirebaseAuth.getInstance();
 
         emailTxt = parentView.findViewById(R.id.email_txt);
@@ -61,6 +62,8 @@ public class LoginFragment extends Fragment {
                 String email = emailTxt.getText().toString();
                 String password = passwordTxt.getText().toString();
                 signIn(email, password);
+                loadingDialog.setMessage("Signing in...");
+                loadingDialog.show(getActivity().getSupportFragmentManager(),"Signing In");
             }
         });
 
@@ -81,6 +84,7 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            loadingDialog.dismiss();
                             getActivity().finish();
                             startActivity(new Intent(getActivity(), MainActivity.class));
                         } else {
