@@ -17,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.hallucind.authenticatedgoosetest.AuthActivity;
+import com.hallucind.authenticatedgoosetest.DialogFragments.LoadingDialog;
 import com.hallucind.authenticatedgoosetest.R;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ public class RegisterFragment extends Fragment {
 
     private final String TAG = "RegisterFragment";
 
+    private LoadingDialog loadingDialog;
     private TextView loginTxt;
     private Button registerBtn;
 
@@ -40,6 +42,7 @@ public class RegisterFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View parentView = inflater.inflate(R.layout.fragment_register, container, false);
+        loadingDialog = new LoadingDialog();
 
         loginTxt = parentView.findViewById(R.id.already_registered_txt);
         displayNameTxt = parentView.findViewById(R.id.display_name);
@@ -52,13 +55,16 @@ public class RegisterFragment extends Fragment {
         loginTxt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((AuthActivity)getActivity()).changeActivity(new LoginFragment());
+                ((AuthActivity) getActivity()).changeActivity(new LoginFragment());
             }
         });
 
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadingDialog.setMessage("Registering...");
+                loadingDialog.show(getActivity().getSupportFragmentManager(), "Signing In");
+
                 final String displayName = displayNameTxt.getText().toString();
                 String email = emailTxt.getText().toString();
                 String password = passwordTxt.getText().toString();
@@ -86,16 +92,14 @@ public class RegisterFragment extends Fragment {
                                                 }
                                             });
 
-                                    if (user != null) {
-                                        user.updateProfile(profileChangeRequest)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    user.updateProfile(profileChangeRequest)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
 
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        ((AuthActivity)getActivity()).changeActivity(new WelcomeFragment());
-                                                    }
-                                                });
-                                    }
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    ((AuthActivity) getActivity()).changeActivity(new WelcomeFragment());
+                                                }
+                                            });
 
                                 } else {
                                     // If sign in fails, display a message to the user.
@@ -103,6 +107,7 @@ public class RegisterFragment extends Fragment {
                                     Toast.makeText(getActivity(), "Authentication failed.",
                                             Toast.LENGTH_SHORT).show();
                                 }
+                                loadingDialog.dismiss();
                             }
                         });
             }
