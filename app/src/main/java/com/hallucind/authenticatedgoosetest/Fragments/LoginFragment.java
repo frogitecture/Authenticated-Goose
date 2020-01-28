@@ -84,12 +84,12 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            loadingDialog.dismiss();
                             getActivity().finish();
                             startActivity(new Intent(getActivity(), MainActivity.class));
                         } else {
                             Toast.makeText(getActivity(), "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
+                        loadingDialog.dismiss();
                     }
                 });
     }
