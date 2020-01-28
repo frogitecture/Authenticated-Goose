@@ -1,1 +1,3 @@
 # Authenticated-Goose
+
+Firebase authentication
